@@ -1,0 +1,14 @@
+CC       ?= gcc
+CFLAGS   ?= -std=c11 -O2 -Wall -Wextra -pedantic
+LDFLAGS  ?=
+LDLIBS   ?= -lm -lz
+
+TARGET = mandelbrot_serial
+SRC    = mandelbrot_serial.c
+
+.PHONY: all
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
