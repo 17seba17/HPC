@@ -9,7 +9,7 @@
 #define DEFAULT_DX_FACTOR  (8u)
 #define DEFAULT_DY_FACTOR  (8u)
 #define DEFAULT_KMAX       (1024u)
-#define DEFAULT_OUTPUT     "img/mandelbrot.pgm"
+#define DEFAULT_OUTPUT     "img/mandelbrot.ppm"
 
 typedef struct
 {

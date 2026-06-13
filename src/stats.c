@@ -1,5 +1,6 @@
 #include "../include/stats.h"
 #include <stdio.h>
+#include <string.h>
 
 uint64_t checksum_update_uint (uint64_t     checksum,
 		      unsigned int value)
@@ -13,6 +14,17 @@ uint64_t checksum_update_uint (uint64_t     checksum,
     }
 
   return checksum;
+}
+
+void zero_stats(render_stats_t *stats){
+  stats->checksum = FNV_OFFSET_BASIS;
+
+
+  memset(stats->my_checksum.slot, 0, sizeof(stats->my_checksum.slot));
+
+  stats->total_iterations = 0u;
+  stats->inside_pixels = 0u;
+
 }
 
 checksum_t my_checksum_update (checksum_t     checksum,
@@ -57,4 +69,17 @@ print_stats (const image_geometry_t *geometry,
   printf ("inside_fraction          %.17g\n", inside_fraction);
   printf ("average_iterations       %.17g\n", average_iterations);
   printf ("total_iterations         %llu\n", (unsigned long long) stats->total_iterations);
+}
+
+
+void aggregateStats(render_stats_t *master_stats, render_stats_t consumer_stats){
+
+
+
+for(unsigned int i=0;i<4;i++){
+master_stats->my_checksum.slot[i]+=consumer_stats.my_checksum.slot[i];}
+master_stats->checksum+=consumer_stats.checksum;
+master_stats->total_iterations+=consumer_stats.total_iterations;
+master_stats->inside_pixels+=consumer_stats.inside_pixels;
+
 }

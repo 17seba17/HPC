@@ -11,23 +11,18 @@ typedef struct
   unsigned int          start_y;
   unsigned int          end_x;
   unsigned int          end_y;
-  unsigned int                  status_up;
-    unsigned int                  status_right;
-  unsigned int                  status_down;
-    unsigned int                  status_left;
+  unsigned int                  count_up;
+  unsigned int                  count_down;
+  unsigned int                  count_left;
+  unsigned int                  count_right;
 } block_t;
+
 void render_image (options_t        *options,
 	      image_geometry_t *geometry,
 	      unsigned char    *image,
 	      render_stats_t   *stats);
 
-void render_stripe (options_t        *options,
-	       image_geometry_t *geometry,
-	       unsigned int      row_begin,
-	       unsigned int      row_end,
-	       unsigned char    *image,
-	       render_stats_t   *stats
-	       );
+
 void render_block (options_t        *options,
 	       image_geometry_t *geometry,
 	       block_t      block,
@@ -35,7 +30,7 @@ void render_block (options_t        *options,
 	       render_stats_t   *stats
 	       );
 
-void render_block_force_brute (options_t        *options,
+void render_block_brute_force (options_t        *options,
 	       image_geometry_t *geometry,
 	       block_t      block,
 	       unsigned char    *image,
@@ -43,7 +38,7 @@ void render_block_force_brute (options_t        *options,
 	       );
 
 
- unsigned int checkVerticalStripe(options_t *options, image_geometry_t *geometry, const unsigned int col, const unsigned int y_begin, const unsigned int y_end, unsigned char    *image);
- unsigned int checkHorizontalStripe(options_t *options, image_geometry_t *geometry, const unsigned int col, const unsigned int y_begin, const unsigned int y_end, unsigned char    *image);
+ unsigned int checkVerticalStripe(options_t *options, image_geometry_t *geometry, const unsigned int col, const unsigned int y_begin, const unsigned int y_end);
+ unsigned int checkHorizontalStripe(options_t *options, image_geometry_t *geometry, const unsigned int col, const unsigned int y_begin, const unsigned int y_end);
 
 #endif

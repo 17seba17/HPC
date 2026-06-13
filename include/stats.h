@@ -16,16 +16,16 @@ typedef struct
 }checksum_t;
 
 typedef struct
-{   uint64_t          checksum;
+{ uint64_t          checksum;
   checksum_t        my_checksum;
   uint64_t          total_iterations;
   uint64_t          inside_pixels;
 } render_stats_t;
 
 
+void aggregateStats(render_stats_t *master_stats, render_stats_t consumer_stats);
 
-
-
+void zero_stats(render_stats_t *stats);
 uint64_t checksum_update_uint (uint64_t     checksum,
                       unsigned int value);
 
