@@ -8,6 +8,13 @@
 #include <mpi.h>
 #include <stdlib.h>
 
+#pragma omp declare reduction(checksum_add : checksum_t : \
+    omp_out.slot[0] += omp_in.slot[0], \
+    omp_out.slot[1] += omp_in.slot[1], \
+    omp_out.slot[2] += omp_in.slot[2], \
+    omp_out.slot[3] += omp_in.slot[3]) \
+    initializer(omp_priv = {{0, 0, 0, 0}})
+
  void sending_image(unsigned char *local_image, block_t block) {
 
     unsigned int block_width = block.end_x - block.start_x;
@@ -21,6 +28,7 @@
     
 
     MPI_Send(local_image, size_total, MPI_BYTE, 0, SENDING_IMAGE_TO_MASTER, MPI_COMM_WORLD);
+
     return;
 }
 
@@ -40,8 +48,8 @@
 
 int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
     
+
     if (image == NULL) {
         printf("Errore nell'allocazione immagine nel rank %i", rank);
         return;
@@ -60,6 +68,10 @@ uint64_t     local_inside_pixels= stats->inside_pixels;
      double ymax=options->ymax;
      double xmin=options->xmin;
 
+
+      #pragma omp parallel for collapse(2) schedule(dynamic, 1) \
+        reduction(+:local_total_iterations, local_inside_pixels) \
+        reduction(checksum_add:local_my_checksum)
   for (unsigned int row = block.start_y; row < block.end_y; ++row) { 
      double ci = ymax - ((double) row + 0.5) * dy;
      unsigned int local_r = row - block.start_y; 
@@ -215,6 +227,8 @@ block_t SW={block.start_x,
              mid_x,
             block.end_y,
             0,down_left,left_down,0};
+
+
 
 
 

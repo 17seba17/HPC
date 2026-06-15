@@ -1,5 +1,6 @@
 #include "../include/kernel.h"
 #include <math.h>
+
 unsigned int mandelbrot_escape (double       cr, double       ci, unsigned int kmax)
 {
            double zr;

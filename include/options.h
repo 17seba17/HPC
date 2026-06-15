@@ -9,6 +9,7 @@
 #define DEFAULT_DX_FACTOR  (8u)
 #define DEFAULT_DY_FACTOR  (8u)
 #define DEFAULT_KMAX       (1024u)
+#define DEFAULT_BRUTE       (1024u)
 #define DEFAULT_OUTPUT     "img/mandelbrot.ppm"
 
 typedef struct
@@ -21,6 +22,7 @@ typedef struct
   unsigned int      dx_factor;
   unsigned int      dy_factor;
   unsigned int      kmax;
+  unsigned int      brute;
   char             *output_path;
 } options_t;
 

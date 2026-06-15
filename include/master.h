@@ -10,8 +10,11 @@
 
 
 
-void gettingBlocks (options_t        *options,
-	      image_geometry_t *geometry, block_t *array,unsigned int *array_size, unsigned char *image);
+void gettingBlocks(options_t        *options,image_geometry_t        *geometry,
+	     block_t *work_queue, int *idle_workers, unsigned char *image, uint8_t *recv_buffer,
+                 unsigned int *arraysize
 
-           void master_terminate_with_error(block_t *work_queue, unsigned char *image, uint8_t *recv_buffer);
+        );
+
+void master_terminate_with_error(block_t *work_queue, int *idle_workers, unsigned char *image, uint8_t *recv_buffer);
 #endif

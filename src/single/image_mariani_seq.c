@@ -1,43 +1,9 @@
-#include "../../include/image.h"
+#include "../../include/single.h"
 #include "../../include/kernel.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-
-
-
-
-
-static void colour_from_iteration (unsigned int    iteration,
-		       unsigned int    kmax,
-		       unsigned char  *rgb
-		       )
-{
-  double t;
-  double one_minus_t;
-
-  if (iteration >= kmax)
-    {
-      rgb[0] = 0u;
-      rgb[1] = 0u;
-      rgb[2] = 0u;
-      return;
-    }
-
-  t = (double) iteration / (double) kmax;
-  one_minus_t = 1.0 - t;
-
-  rgb[0] = (unsigned char) (255.0 * 9.0 * one_minus_t * t * t * t);
-  rgb[1] = (unsigned char) (255.0 * 15.0 * one_minus_t * one_minus_t * t * t);
-  rgb[2] = (unsigned char) (255.0 * 8.5 * one_minus_t * one_minus_t * one_minus_t * t);
-}
-
-
-
-
-
-
 
 void render_image (options_t        *options,
 	      image_geometry_t *geometry,
@@ -48,14 +14,6 @@ void render_image (options_t        *options,
   unsigned int block_y;
   block_t block;
   memset(&block, 0, sizeof(block));
-
-  stats->checksum = FNV_OFFSET_BASIS;
-
-  memset(stats->my_checksum.slot, 0, sizeof(stats->my_checksum.slot));
-
-  stats->total_iterations = 0u;
-  stats->inside_pixels = 0u;
-
   
 
 
@@ -87,7 +45,6 @@ void render_block_brute_force (options_t        *options,
   unsigned int row;
   unsigned int col;
   unsigned int iteration;
-  uint64_t local_checksum;
   checksum_t local_my_checksum;
   uint64_t     local_total_iterations;
   uint64_t     local_inside_pixels;
@@ -95,7 +52,6 @@ void render_block_brute_force (options_t        *options,
   double       ci;
   size_t       pixel_offset;
 
-     local_checksum = stats->checksum;
      local_my_checksum = stats->my_checksum;
      local_total_iterations = stats->total_iterations;
      local_inside_pixels = stats->inside_pixels;
@@ -106,6 +62,7 @@ void render_block_brute_force (options_t        *options,
 
       for (col = block.start_x; col < block.end_x; ++col)
         {
+
           cr = options->xmin + ((double) col + 0.5) * geometry->dx;
           iteration = mandelbrot_escape (cr, ci, options->kmax);
           
@@ -113,7 +70,6 @@ void render_block_brute_force (options_t        *options,
                           + (size_t) col) * 3u;
           colour_from_iteration (iteration, options->kmax, &image[pixel_offset]);
 
-        local_checksum = checksum_update_uint(local_checksum, iteration);
         local_my_checksum = my_checksum_update(local_my_checksum, row, col, iteration);
 
 
@@ -125,7 +81,7 @@ void render_block_brute_force (options_t        *options,
         }
     }
 
-  stats->checksum = local_checksum;
+
   stats->my_checksum = local_my_checksum;
   stats->total_iterations = local_total_iterations;
   stats->inside_pixels = local_inside_pixels;
@@ -140,12 +96,11 @@ void render_block (options_t        *options,
 	       ){
 
 
-unsigned int start_x = block.start_x;
 
 unsigned int width = block.end_x-block.start_x;
 unsigned int height = block.end_y-block.start_y;
 
-if(width*height<1024){
+if(width*height<options->brute){
    render_block_brute_force(options,geometry,block, image, stats);
    return;
 }
@@ -216,31 +171,9 @@ if(right_down == 0){
 
 if(upper_left+upper_right+down_right+down_left+left_up+left_down+right_up+right_down==2*height+2*width){ // if black
 
-uint64_t local_checksum;
-uint64_t local_total_iterations;
-uint64_t local_inside_pixels;
-
-local_checksum = stats->checksum;
-local_total_iterations = stats->total_iterations;
-local_inside_pixels = stats->inside_pixels;
-
-const uint64_t kmax = options->kmax;
-const size_t width = geometry->width;
-    for (unsigned int r = block.start_y ; r < block.end_y ; ++r) {
-        for (unsigned int c_idx = block.start_x ; c_idx < block.end_x ; ++c_idx) {
-            size_t pixel_offset = ((size_t) r * width + (size_t) c_idx) * 3u;
-            colour_from_iteration(kmax, kmax, &image[pixel_offset]);
-
-            local_checksum = checksum_update_uint (local_checksum, kmax);
-           
-            local_total_iterations += kmax;
-           local_inside_pixels += 1u;
-        }
-    }
-
-    stats->checksum =local_checksum;
-    stats->total_iterations =local_total_iterations;
-    stats->inside_pixels =local_inside_pixels;
+uint64_t block_area = width * height;
+stats->total_iterations += block_area * (uint64_t)options->kmax;
+stats->inside_pixels += block_area;
 
     return;
 }
@@ -281,53 +214,3 @@ render_block(options,geometry,SW,image,stats);
 render_block(options,geometry,NE,image,stats);
 
 }
-unsigned int checkHorizontalStripe(options_t *options, image_geometry_t *geometry, const     unsigned int row, const unsigned int x_begin, const unsigned int x_end){
-  
-    
-  unsigned int counter=0;
-
-    const double ci = options->ymax - ((double) (row) + 0.5) * geometry->dy;
-    
-
-
-//inizio del for
-for (unsigned int col=x_begin;  col <x_end; ++col){
-    double cr = options->xmin + ((double) col + 0.5) * geometry->dx;
-    unsigned int iteration = mandelbrot_escape (cr, ci, options->kmax);
-
-    if(iteration!=options->kmax){
-        return counter;
-    }
-
-    counter++;
- 
-}
-    return counter;
-}
-
- unsigned int checkVerticalStripe(options_t *options, image_geometry_t *geometry, const unsigned 
-    int col, const unsigned int y_begin, const unsigned int y_end){
-
-
-      unsigned int counter=0;
-        const double cr = options->xmin +((double)col + 0.5)* geometry->dx;
-        
-
-
-
-// inizio del for  
-for (unsigned int row=y_begin; row < y_end; ++row){
-    double ci = options-> ymax- ((double) row + 0.5) * geometry->dy;
-    unsigned int iteration = mandelbrot_escape (cr, ci, options->kmax);
-    
-    // se sono diversi allora non ha senso continuare
-    if(iteration!=options->kmax){
-        return counter;
-    }
-  counter++;
-}
-    return counter;
-
-}
-
-

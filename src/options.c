@@ -34,6 +34,7 @@ void print_usage (char     *program_name)
            "  --dx-factor VALUE   accepted for interface compatibility         (%u)\n"
            "  --dy-factor VALUE   number of serial horizontal work stripes     (%u)\n"
            "  --kmax VALUE        maximum Mandelbrot iteration count           (%u)\n"
+           "  --brute VALUE       the threshold for Mariani Silver algorithm   (%u)\n"
            "  --output FILE       output PNG file                              (%s)\n"
            "  --help              show this help message\n"
            "\n"
@@ -42,7 +43,7 @@ void print_usage (char     *program_name)
            program_name,
            DEFAULT_XMIN, DEFAULT_YMAX, DEFAULT_XMAX, DEFAULT_YMIN,
            DEFAULT_PPU, DEFAULT_DX_FACTOR, DEFAULT_DY_FACTOR,
-           DEFAULT_KMAX, DEFAULT_OUTPUT, program_name);
+           DEFAULT_KMAX,DEFAULT_BRUTE, DEFAULT_OUTPUT, program_name);
 }
 
 //set default options
@@ -56,6 +57,7 @@ void set_default_options (options_t   *options)
   options->dx_factor = DEFAULT_DX_FACTOR;
   options->dy_factor = DEFAULT_DY_FACTOR;
   options->kmax      = DEFAULT_KMAX;
+  options->brute      = DEFAULT_BRUTE;
   options->output_path = DEFAULT_OUTPUT;
 }
 
@@ -109,6 +111,11 @@ int parse_command_line (int          argc, char       **argv, options_t   *optio
       else if (strcmp (argv[i], "--kmax") == 0)
         {
           if (parse_unsigned_option (argc, argv, &i, &options->kmax) != 0)
+            return -1;
+        }
+      else if (strcmp (argv[i], "--brute") == 0)
+        {
+          if (parse_unsigned_option (argc, argv, &i, &options->brute) != 0)
             return -1;
         }
       else if (strcmp (argv[i], "--output") == 0)

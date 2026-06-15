@@ -2,6 +2,7 @@
 #include "../include/geometry.h"
 #include "../include/stats.h"
 #include "../include/image.h"
+#include "../include/single.h"
 #include "../include/io.h"
 
 #include <stdlib.h>
@@ -11,6 +12,7 @@
 #define EXIT_FAILURE 1
 
 int main(int argc, char **argv) {
+    printf("You are running main_brute_seq!\n");
     options_t options;
     image_geometry_t geometry;
     render_stats_t stats;
