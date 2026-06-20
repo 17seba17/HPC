@@ -1,9 +1,9 @@
+MARCH  ?= x86-64-v4
 CC       = mpicc
-CFLAGS   ?= -std=c11 -O2 -Wall -Wextra -pedantic
+CFLAGS   ?= -std=c11 -O3 -march=$(MARCH) -ffast-math -Wall -Wextra -pedantic
 LDFLAGS  ?=
 LDLIBS   ?= -lm -lz
 DIR      = build/
-
 
 #Sequential Brute Force
 BIN_BRUTE_SEQ   = mandel_brute_seq
