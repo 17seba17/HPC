@@ -1,6 +1,6 @@
 #ifndef MASTER_H
 #define MASTER_H
-#define MAX_BLOCKS_IN_QUEUE 500000
+#define MAX_BLOCKS_IN_QUEUE 5000000
 #include "options.h"
 #include "geometry.h"
 #include "stats.h"
