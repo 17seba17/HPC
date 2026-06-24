@@ -101,6 +101,7 @@ void rendering_block (options_t        *options,
 	       render_stats_t   *stats, block_t three_blocks[3], unsigned char *image
 	       ){
 
+stats->tiles_processed+=1;
 
           
 if((block.end_x-block.start_x)*(block.end_y-block.start_y)<options->brute){

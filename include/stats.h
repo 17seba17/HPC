@@ -26,6 +26,7 @@ typedef struct
   struct timespec          end_t;
   uint64_t          time_waiting;
   uint64_t          time_working;
+  uint16_t          tiles_processed;
 } render_stats_t;
 
 

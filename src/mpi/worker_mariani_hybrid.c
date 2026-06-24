@@ -69,7 +69,7 @@ uint64_t     local_inside_pixels= stats->inside_pixels;
      double xmin=options->xmin;
 
 
-      #pragma omp parallel for collapse(2) schedule(dynamic, 1) \
+      #pragma omp parallel for collapse(2) schedule(dynamic) \
         reduction(+:local_total_iterations, local_inside_pixels) \
         reduction(checksum_add:local_my_checksum)
   for (unsigned int row = block.start_y; row < block.end_y; ++row) { 
@@ -113,6 +113,7 @@ void rendering_block (options_t        *options,
 	       render_stats_t   *stats, block_t three_blocks[3], unsigned char *image
 	       ){
 
+stats->tiles_processed+=1;
 
           
 if((block.end_x-block.start_x)*(block.end_y-block.start_y)<options->brute){

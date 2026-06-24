@@ -145,10 +145,10 @@ smoke: all
 		fi; \
 		\
 		# 4. Estrazione delle metriche dall'output della console \
-		width=$$(echo "$$console_out" | grep "^width" | awk '{print $$2}'); \
-		height=$$(echo "$$console_out" | grep "^height" | awk '{print $$2}'); \
-		inside=$$(echo "$$console_out" | grep "^inside_pixels" | awk '{print $$2}'); \
-		my_checksum=$$(echo "$$console_out" | grep "^my_checksum" | awk '{print $$2}'); \
+        width=$$(echo "$$console_out" | grep "^width" | tail -n 1 | awk '{print $$2}'); \
+        height=$$(echo "$$console_out" | grep "^height" | tail -n 1 | awk '{print $$2}'); \
+        inside=$$(echo "$$console_out" | grep "^inside_pixels" | tail -n 1 | awk '{print $$2}'); \
+        my_checksum=$$(echo "$$console_out" | grep "^my_checksum" | tail -n 1 | awk '{print $$2}'); \
 		\
 		# Calcolo dei limiti teorici \
 		total_pixels=$$((width * height)); \

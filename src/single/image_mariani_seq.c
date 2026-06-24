@@ -95,7 +95,7 @@ void render_block (options_t        *options,
 	       render_stats_t   *stats
 	       ){
 
-
+stats->tiles_processed+=1;
 
 unsigned int width = block.end_x-block.start_x;
 unsigned int height = block.end_y-block.start_y;

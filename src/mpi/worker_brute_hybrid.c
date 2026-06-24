@@ -42,7 +42,10 @@ void sending_image(unsigned char *local_image, block_t block) {
 	       render_stats_t   *stats, unsigned char *image
 	       )
 {
-  ///i have to allocate memory for the image
+
+  
+stats->tiles_processed+=1;
+
 
 int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

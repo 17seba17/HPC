@@ -237,7 +237,9 @@ uint8_t worked=0;
             updateTimeWaiting(&stats);
 
     }
-        printf("Master asked to terminate!\n");
+        printf("Master asked to terminate! I am rank %u !\n", rank);
+        print_stats(&geometry, &options, &stats);
+
         MPI_Send(&stats, sizeof(stats),MPI_BYTE,0,SENDING_STATS,MPI_COMM_WORLD);
         free(image_to_send);
         MPI_Finalize();

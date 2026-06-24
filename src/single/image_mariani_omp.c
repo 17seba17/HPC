@@ -24,9 +24,10 @@ void render_image (options_t        *options,
     uint64_t total_iterations = 0;
     uint64_t inside_pixels = 0;
     checksum_t my_checksum = {{0, 0, 0, 0}};
+    uint16_t tiles_processed=0;
 
-    #pragma omp parallel for collapse(2) schedule(dynamic, 1) \
-        reduction(+:total_iterations, inside_pixels) \
+    #pragma omp parallel for collapse(2) schedule(dynamic) \
+        reduction(+:total_iterations, inside_pixels,tiles_processed) \
         reduction(checksum_add:my_checksum)
     for(unsigned int block_x = 0; block_x < options->dx_factor; ++block_x) {
         for(unsigned int block_y = 0; block_y < options->dy_factor; ++block_y) {
@@ -43,11 +44,13 @@ void render_image (options_t        *options,
             memset(local_stats.my_checksum.slot, 0, sizeof(local_stats.my_checksum.slot));
             local_stats.total_iterations = 0;
             local_stats.inside_pixels = 0;
+            local_stats.tiles_processed =0;
 
             render_block(options, geometry, block, image, &local_stats);
 
             total_iterations += local_stats.total_iterations;
             inside_pixels    += local_stats.inside_pixels;
+            tiles_processed += local_stats.tiles_processed;
             
 
             for (int i = 0; i < 4; i++) {
@@ -59,6 +62,7 @@ void render_image (options_t        *options,
     stats->total_iterations = total_iterations;
     stats->inside_pixels    = inside_pixels;
     stats->my_checksum      = my_checksum;
+    stats->tiles_processed      = tiles_processed;
 }
 
 
@@ -69,6 +73,7 @@ void render_block_brute_force (options_t        *options,
 	       render_stats_t   *stats
 	       )
 {
+
 
   unsigned int row;
   unsigned int col;
@@ -121,6 +126,7 @@ void render_block (options_t        *options,
 	       render_stats_t   *stats
 	       ){
 
+stats->tiles_processed++;
 
 
 unsigned int width = block.end_x-block.start_x;

@@ -44,7 +44,9 @@ void render_block_brute_force (options_t        *options,
 	       render_stats_t   *stats
 	       )
 {
+stats->tiles_processed+=1;
 
+  
   unsigned int row;
   unsigned int col;
   unsigned int iteration;

@@ -206,7 +206,9 @@ uint8_t worked=0;
         int received_tag = status.MPI_TAG;
 
         if(received_tag == STOPPING_PROCESS) {
-        printf("Master asked to terminate!\n");
+        printf("Master asked to terminate! I am rank %u !\n", rank);
+        print_stats(&geometry, &options, &stats);
+
          free(image_to_send);
               if(worked==1){
         clock_gettime(CLOCK_MONOTONIC, &stats.end_t);
