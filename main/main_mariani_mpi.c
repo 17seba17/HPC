@@ -54,11 +54,20 @@ unsigned char *image = NULL;
 uint8_t *recv_buffer = NULL;
 
 
+uint8_t **recv_buffers = malloc(size * sizeof(uint8_t*));
+MPI_Request *requests = malloc(size * sizeof(MPI_Request));
 
 if(size<2){
     printf("devi allocare almeno due nodi\n");
     master_terminate_with_error(work_queue, idle_workers, image, recv_buffer);
 }
+
+for (int worker = 1; worker < size; ++worker) {
+        recv_buffers[worker] = malloc(max_buffer_size);
+        MPI_Irecv(recv_buffers[worker], max_buffer_size, MPI_BYTE, 
+                  worker, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[worker]);
+    }
+
 
 
 // queue of blocks
@@ -114,20 +123,32 @@ recv_buffer = malloc(max_buffer_size);
 
 while(queue_size > 0 || in_flight>0){
    
-   MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        int completed_idx;
+        MPI_Status status;
+
+//    MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
 
-   int incoming_bytes = 0;
-   MPI_Get_count(&status, MPI_BYTE, &incoming_bytes);
+//    int incoming_bytes = 0;
+//    MPI_Get_count(&status, MPI_BYTE, &incoming_bytes);
 
 
-   MPI_Recv(recv_buffer, incoming_bytes, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//    MPI_Recv(recv_buffer, incoming_bytes, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 
    
+        MPI_Waitany(size - 1, requests + 1, &completed_idx, &status);
+    int worker_rank = completed_idx + 1;
+        int tag = status.MPI_TAG;
+        uint8_t *worker_buf = recv_buffers[worker_rank];
+        int incoming_bytes = 0;
+        MPI_Get_count(&status, MPI_BYTE, &incoming_bytes);
+
+
+
 
    
-    if(status.MPI_TAG == ASKING_BLOCK_TO_MASTER){ 
+    if(tag == ASKING_BLOCK_TO_MASTER){ 
     in_flight--; 
 
 
@@ -139,13 +160,13 @@ while(queue_size > 0 || in_flight>0){
         idle_workers[num_idle++] = status.MPI_SOURCE;
     }
    }
-   else if(status.MPI_TAG == SENDING_THREE_BLOCKS_TO_MASTER){ 
+   else if(tag == SENDING_THREE_BLOCKS_TO_MASTER){ 
 
     
 block_t NE, SE, SW;
-    memcpy(&NE, recv_buffer, sizeof(block_t));
-    memcpy(&SE, recv_buffer  + sizeof(block_t), sizeof(block_t));
-    memcpy(&SW, recv_buffer  + 2 * sizeof(block_t), sizeof(block_t));
+    memcpy(&NE, worker_buf, sizeof(block_t));
+    memcpy(&SE, worker_buf  + sizeof(block_t), sizeof(block_t));
+    memcpy(&SW, worker_buf  + 2 * sizeof(block_t), sizeof(block_t));
     work_queue[queue_size++] = NE;
     work_queue[queue_size++] = SE;
     work_queue[queue_size++] = SW;
@@ -161,17 +182,17 @@ while (num_idle > 0 && queue_size > 0) {
 
 
    }
-   else if(status.MPI_TAG == SENDING_IMAGE_TO_MASTER){ 
+   else if(tag == SENDING_IMAGE_TO_MASTER){ 
    
 /// sending image to master     
 
     block_t received_block;
-    memcpy(&received_block, recv_buffer, sizeof(block_t));
+    memcpy(&received_block, worker_buf, sizeof(block_t));
 
         unsigned int block_width = received_block.end_x - received_block.start_x;
         unsigned int block_height = received_block.end_y - received_block.start_y;
 
-        uint8_t *pixel_data_start = recv_buffer  + sizeof(block_t);
+        uint8_t *pixel_data_start = worker_buf  + sizeof(block_t);
 
         for (unsigned int i = 0; i < block_height; i++) {
             size_t dest_offset = ((size_t)(received_block.start_y + i) * geometry.width + received_block.start_x) * 3u;
@@ -180,14 +201,43 @@ while (num_idle > 0 && queue_size > 0) {
             memcpy(&image[dest_offset], &pixel_data_start[src_offset], block_width * 3u);
         }
         
+
+    in_flight--; 
+
+
+        if (queue_size > 0) {
+        block_t block = work_queue[--queue_size];
+        MPI_Send(&block, sizeof(block_t), MPI_BYTE, status.MPI_SOURCE, SENDING_BLOCK_TO_WORKER, MPI_COMM_WORLD);
+        in_flight++;
+    } else {
+        idle_workers[num_idle++] = status.MPI_SOURCE;
     }
 
 
+    }
 
+
+   MPI_Irecv(recv_buffers[worker_rank], max_buffer_size, MPI_BYTE, 
+                  worker_rank, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[worker_rank]);
 
 
 
 }
+
+
+
+
+
+    for (int worker = 1; worker < size; ++worker) {
+        MPI_Cancel(&requests[worker]);
+        MPI_Request_free(&requests[worker]);
+        free(recv_buffers[worker]);
+    }
+    free(recv_buffers);
+    free(requests);
+
+
+
 for (int worker = 1; worker < size; ++worker) {
             MPI_Send(NULL, 0, MPI_BYTE, worker, STOPPING_PROCESS, MPI_COMM_WORLD);
 }
@@ -263,7 +313,6 @@ uint8_t worked=0;
 
 
 clock_gettime(CLOCK_MONOTONIC, &stats.start_t);
-         MPI_Send(NULL,0,MPI_BYTE,0,ASKING_BLOCK_TO_MASTER,MPI_COMM_WORLD);
 
        }
 
