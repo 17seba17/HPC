@@ -49,7 +49,7 @@ ALL_TARGETS = $(DIR)$(BIN_BRUTE_SEQ) \
               $(DIR)$(BIN_MARIANI_HYB)
 
 
-.PHONY: all clean make_dir show_image smoke mandel_brute_seq mandel_mariani_seq mandel_mariani_omp mandel_brute_omp mandel_brute_hyb mandel_mariani_mpi
+.PHONY: all clean make_dir show_image smoke mandel_brute_seq mandel_mariani_seq mandel_mariani_omp mandel_brute_omp mandel_brute_hyb mandel_mariani_mpi mandel_mariani_hyb
 
 vpath %.c src src/single src/mpi main
 vpath %.h include
@@ -61,6 +61,8 @@ mandel_brute_hyb: $(DIR)$(BIN_BRUTE_HYB)
 mandel_mariani_seq: $(DIR)$(BIN_MARIANI_SEQ)
 mandel_mariani_omp: $(DIR)$(BIN_MARIANI_OMP)
 mandel_mariani_mpi: $(DIR)$(BIN_MARIANI_MPI)
+mandel_mariani_hyb: $(DIR)$(BIN_MARIANI_HYB)
+
 
 all: make_dir $(ALL_TARGETS)
 

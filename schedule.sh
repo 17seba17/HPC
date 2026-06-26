@@ -1,13 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=mandel_sched
-#SBATCH --partition=dcgp_usr_prod
-#SBATCH --output=output/sched_%j.out
+#SBATCH --job-name=mandel_full
+#SBATCH --partition=dcgp_usr_prod      # Ora prova a rimettere la produzione
+#SBATCH --account=uts26_tornator_0       # Tutto minuscolo come visto in sshare
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
-#SBATCH --cpus-per-task=16
-#SBATCH --account=uTS26_Tornator
-#SBATCH --mem=50G
-#SBATCH --time=01:30:00
+#SBATCH --ntasks=4                     # Puoi iniziare a salire con i task
+#SBATCH --cpus-per-task=16             # 16 thread per rank (totale 64 core)
+#SBATCH --mem=100G                     # Ora puoi chiedere più memoria se serve
+#SBATCH --gres=tmpfs:10g
+#SBATCH --time=01:00:00                # Un'ora per fare un po' di test seri
+#SBATCH --output=output/mandel_uts26_%j.out
 
 mkdir -p output/
 
@@ -23,7 +24,7 @@ fi
 
 echo "Compilazione in corso..."
 make clean
-make MARCH=$DETECTED_MARCH mandel_brute_omp mandel_brute_hybrid mandel_mariani_hybrid
+make MARCH=$DETECTED_MARCH mandel_brute_omp mandel_brute_hyb mandel_mariani_omp mandel_mariani_hyb
 
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
@@ -34,9 +35,15 @@ CSV_FILE="output/verify_schedule.csv"
 
 echo "eseguibile,schedule,risoluzione,factor,brute,run_id,tempo_di_esecuzione" > $CSV_FILE
 
-EXECUTABLES=("mandel_brute_omp" "mandel_brute_hybrid" "mandel_mariani_hybrid")
-SCHEDULES=("static" "dynamic" "dynamic,16" "dynamic,64" "guided" "guided,16")
-RESOLUTIONS=(2048 4096 8192)
+
+EXECUTABLES=("mandel_mariani_hybrid")
+SCHEDULES=("static" "dynamic" "dynamic,2" "dynamic,4" "dynamic,8" "guided")
+RESOLUTIONS=(4096 8192)
+
+# EXECUTABLES=("mandel_brute_omp")
+# SCHEDULES=("static")
+# RESOLUTIONS=(512)
+
 REPETITIONS=5
 
 FACTOR=16
