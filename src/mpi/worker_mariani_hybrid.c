@@ -73,10 +73,12 @@ uint64_t     local_inside_pixels= stats->inside_pixels;
         reduction(+:local_total_iterations, local_inside_pixels) \
         reduction(checksum_add:local_my_checksum)
   for (unsigned int row = block.start_y; row < block.end_y; ++row) { 
-     double ci = ymax - ((double) row + 0.5) * dy;
-     unsigned int local_r = row - block.start_y; 
       for (unsigned int col = block.start_x; col < block.end_x; ++col)
         {
+
+     double ci = ymax - ((double) row + 0.5) * dy;
+     unsigned int local_r = row - block.start_y; 
+
           double cr = xmin + ((double) col + 0.5) * dx;
           unsigned int iteration = mandelbrot_escape (cr, ci,kmax);
                   unsigned int local_c = col - block.start_x; 
