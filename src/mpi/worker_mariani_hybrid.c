@@ -193,13 +193,9 @@ if(upper_left+upper_right+down_right+down_left+left_up+left_down+right_up+right_
 uint64_t block_area = width * height;
 stats->total_iterations += block_area * (uint64_t)options->kmax;
 stats->inside_pixels += block_area;
-
+MPI_Send(NULL, 0, MPI_BYTE, 0, ASKING_BLOCK_TO_MASTER, MPI_COMM_WORLD);
 
     return;
-}
-else if(upper_left+upper_right+down_right+down_left+left_up+left_down+right_up+right_down==0){
-
-
 }
 
 

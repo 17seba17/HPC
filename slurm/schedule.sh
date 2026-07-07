@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=mandel_full
+#SBATCH --job-name=schedule_mandelbrot
 #SBATCH --partition=dcgp_usr_prod
 #SBATCH --account=uts26_tornator_0
 #SBATCH --nodes=1
@@ -7,13 +7,12 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=100G
 #SBATCH --gres=tmpfs:10g
-#SBATCH --time=01:00:00
-#SBATCH --output=output/mandel_uts26_%j.out
+#SBATCH --time=00:10:00
+#SBATCH --output=output/schedule_%j.out
 
 mkdir -p output/
 
 
-echo "Sostituisco tutte le occorrenze di 'dynamic' con 'runtime'..."
 find . -type f \( -name "*.c" -o -name "*.h" \) -exec sed -i 's/dynamic/runtime/g' {} +
 
 
@@ -22,9 +21,8 @@ if [ -z "$DETECTED_MARCH" ]; then
     DETECTED_MARCH="x86-64-v4"
 fi
 
-echo "Compilazione in corso..."
 make clean
-make MARCH=$DETECTED_MARCH mandel_brute_omp mandel_brute_hyb mandel_mariani_omp mandel_mariani_hyb mandel_mariani_mpi
+make MARCH=$DETECTED_MARCH mandel_brute_omp mandel_brute_hyb mandel_mariani_omp mandel_mariani_hyb
 
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
@@ -33,16 +31,12 @@ export OMP_PROC_BIND=close
 
 CSV_FILE="output/verify_schedule.csv"
 
-echo "eseguibile,schedule,risoluzione,factor,brute,run_id,tempo_di_esecuzione" > $CSV_FILE
+echo "exec,schedule,res,factor,brute,run_id,time" > $CSV_FILE
 
 
-EXECUTABLES=("mandel_brute_omp" "mandel_brute_hybrid" "mandel_mariani_omp" "mandel_mariani_hyb" "mandel_mariani_mpi")
+EXECUTABLES=("mandel_mariani_hybrid")
 SCHEDULES=("static" "dynamic" "dynamic,2" "dynamic,4" "dynamic,8" "guided")
 RESOLUTIONS=(4096 8192)
-
-
-
-
 
 REPETITIONS=5
 
@@ -82,8 +76,7 @@ for EXEC in "${EXECUTABLES[@]}"; do
     done
 done
 
-echo "Dati salvati in $CSV_FILE"
 
 find . -type f \( -name "*.c" -o -name "*.h" \) -exec sed -i 's/runtime/dynamic/g' {} +
 
-echo "Finito!"
+echo "end"

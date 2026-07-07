@@ -126,16 +126,6 @@ while(queue_size > 0 || in_flight>0){
         int completed_idx;
         MPI_Status status;
 
-//    MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
-
-//    int incoming_bytes = 0;
-//    MPI_Get_count(&status, MPI_BYTE, &incoming_bytes);
-
-
-//    MPI_Recv(recv_buffer, incoming_bytes, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-
    
         MPI_Waitany(size - 1, requests + 1, &completed_idx, &status);
     int worker_rank = completed_idx + 1;

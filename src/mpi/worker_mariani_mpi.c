@@ -187,10 +187,7 @@ stats->inside_pixels += block_area;
 
     return;
 }
-else if(upper_left+upper_right+down_right+down_left+left_up+left_down+right_up+right_down==0){
 
-
-}
 
 
 

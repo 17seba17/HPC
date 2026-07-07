@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name=mandel_dense
+#SBATCH --job-name=parameter_mandelbrot
 #SBATCH --partition=GENOA
-#SBATCH --output=output/mandel_%j.out
+#SBATCH --output=output/parameter_%j.out
 #SBATCH --nodes=1
-#SBATCH --ntasks=64
+#SBATCH --ntasks=32
 #SBATCH --cpus-per-task=1
 #SBATCH --account=dssc
 #SBATCH --mem=50G
@@ -24,18 +24,12 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 
 CSV_FILE="output/verify_factors.csv"
-echo "factor,risoluzione,tempo_di_esecuzione,brute" > $CSV_FILE
+echo "factor,res,time,brute" > $CSV_FILE
 
-
-# RESOLUTIONS=(8192)
-# FACTOR_VALUES=({32..128})
-
-# RESOLUTIONS=(2048 4096 8192)
-# FACTOR_VALUES=(1 4 8 16 32 48 64 96 128 192 256 384 512 768 1024 1280 1536 1792 2048)
 
 RESOLUTION=8192
 FACTOR_VALUES=(4 5 8 9 16 17 32 33 64 65 128 129 256 257 512 513)
-BRUTE_VALUES=(256 512 2048 4096 8192)
+BRUTE_VALUES=(16384 32768 65536 131072)
 
 
 for BRUTE in "${BRUTE_VALUES[@]}"; do
@@ -49,7 +43,7 @@ for FACTOR in "${FACTOR_VALUES[@]}"; do
        
         # MPI
         START_MPI=$(date +%s.%N)
-        OUTPUT_MPI=$(time mpirun ./build/mandel_mariani_mpi --ppu $RESOLUTION --dx-factor $FACTOR --dy-factor $FACTOR --brute $BRUTE  2>&1)
+        OUTPUT_MPI=$(mpirun ./build/mandel_mariani_mpi --ppu $RESOLUTION --dx-factor $FACTOR --dy-factor $FACTOR --brute $BRUTE)
         END_MPI=$(date +%s.%N)
         TIME_MPI=$(echo "$END_MPI - $START_MPI" | bc)
         
@@ -59,4 +53,4 @@ for FACTOR in "${FACTOR_VALUES[@]}"; do
     done
 done
 
-echo "Dati salvati in $CSV_FILE"
+echo "end"

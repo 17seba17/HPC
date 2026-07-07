@@ -1,7 +1,6 @@
-#!/bin/bash
-#SBATCH --job-name=mandel_dense
+#SBATCH --job-name=mismatch_mandelbrot
 #SBATCH --partition=GENOA
-#SBATCH --output=output/mandel_%j.out
+#SBATCH --output=output/mismatch_%j.out
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=64
@@ -23,8 +22,8 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export OMP_PLACES=cores
 export OMP_PROC_BIND=close
 
-CSV_FILE="output/verify_results.csv"
-echo "kmax,risoluzione,numero di pixel interni,metodo usato,tempo di esecuzione" > $CSV_FILE
+CSV_FILE="output/mismatch.csv"
+echo "kmax,risoluzione,number_of_internal_pixels,method,time_execution" > $CSV_FILE
 
 RESOLUTIONS=(1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192)
 KMAX_VALUES=(1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192)
@@ -57,5 +56,4 @@ for KMAX in "${KMAX_VALUES[@]}"; do
         
     done
 done
-
-echo "Esperimenti completati! Dati salvati in $CSV_FILE"
+echo "end"

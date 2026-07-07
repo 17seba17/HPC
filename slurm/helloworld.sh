@@ -1,13 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=mandel_numa
+#SBATCH --job-name=helloworld_mandelbrot
 #SBATCH --partition=GENOA
-#SBATCH --output=output/mandel_%j.out
+#SBATCH --output=output/hello_%j.out
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=4
 #SBATCH --account=dssc
 #SBATCH --mem=5G
 #SBATCH --time=00:15:00
+
 EXECUTABLE="mandel_mariani_mpi"
 mkdir -p output/
 DETECTED_MARCH=$(gcc -Q --help=target -march=native | grep -E '^\s*-march=' | awk '{print $2}')
