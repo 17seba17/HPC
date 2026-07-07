@@ -30,7 +30,7 @@ BIN_MARIANI_OMP = mandel_mariani_omp
 SRC_MARIANI_OMP = main_mariani_omp.c image.c options.c geometry.c kernel.c stats.c single/image_mariani_omp.c io.c
 OBJ_MARIANI_OMP = $(addprefix $(DIR), $(notdir $(SRC_MARIANI_OMP:.c=.o)))
 
-# 6. Mariani-Silver MPI Puro (Master-Worker)
+# Mariani-Silver MPI Puro (Master-Worker)
 BIN_MARIANI_MPI = mandel_mariani_mpi
 SRC_MARIANI_MPI = main_mariani_mpi.c image.c options.c geometry.c kernel.c stats.c io.c mpi/master_mariani_mpi.c mpi/worker_mariani_mpi.c
 OBJ_MARIANI_MPI = $(addprefix $(DIR), $(notdir $(SRC_MARIANI_MPI:.c=.o)))
@@ -54,7 +54,6 @@ ALL_TARGETS = $(DIR)$(BIN_BRUTE_SEQ) \
 vpath %.c src src/single src/mpi main
 vpath %.h include
 
-# 3/7
 mandel_brute_seq: $(DIR)$(BIN_BRUTE_SEQ)
 mandel_brute_omp: $(DIR)$(BIN_BRUTE_OMP)
 mandel_brute_hyb: $(DIR)$(BIN_BRUTE_HYB)
@@ -106,18 +105,15 @@ $(DIR)$(BIN_MARIANI_HYB): $(OBJ_MARIANI_HYB)
 
 
 smoke: all
-	@echo "=========================================================================="
-	@echo "                   ANALISI DIAGNOSTICA DEI BINARI                         "
-	@echo "=========================================================================="
 	@mkdir -p img/
 	@for exe in $(ALL_TARGETS); do \
 		name=$$(basename $$exe); \
 		output_img="img/$$name.ppm"; \
 		rm -f $$output_img; \
 		\
-		echo -n "Stato di [$$name]: "; \
+		echo -n "EXEC [$$name]: "; \
 		\
-		# Esecuzione del binario e cattura dell'output di console \
+		# executing binary \
 		if echo $$name | grep -q "mpi\|hybrid"; then \
 			console_out=$$(mpirun -np 2 ./$$exe --output $$output_img 2>&1); \
 		else \
@@ -125,45 +121,44 @@ smoke: all
 		fi; \
 		status=$$?; \
 		\
-		# 1. Rilevamento crash di sistema (es. Segmentation Fault) \
+		# Segmentation Fault \
 		if [ $$status -eq 139 ]; then \
-			echo "ERRORE DI SISTEMA (Segmentation Fault / Core Dumped)"; \
+			echo "SYSTEM ERROR (Segmentation Fault / Core Dumped)"; \
 			continue; \
 		elif [ $$status -ne 0 ]; then \
-			echo "ERRORE DI ESECUZIONE (Codice di errore: $$status)"; \
+			echo "EXEC ERROR (Codice di errore: $$status)"; \
 			continue; \
 		fi; \
 		\
-		# 2. Rilevamento blocco non implementato (Output 'TBD') \
+		# TBD \
 		if echo "$$console_out" | grep -q -i "TBD"; then \
-			echo "NON IMPLEMENTATO (Rilevata stringa di completamento 'TBD')"; \
+			echo "NOT IMPLEMENTED"; \
 			continue; \
 		fi; \
 		\
-		# 3. Verifica della presenza fisica del file d'immagine sul disco \
+		# checking image \
 		if [ ! -f $$output_img ]; then \
-			echo "ESECUZIONE CORRETTA SENZA OUTPUT (Nessun file d'immagine generato)"; \
+			echo "CORRECT EXECUTION WITHOUT OUTPUT (No image found)"; \
 			continue; \
 		fi; \
 		\
-		# 4. Estrazione delle metriche dall'output della console \
+		# metrics \
         width=$$(echo "$$console_out" | grep "^width" | tail -n 1 | awk '{print $$2}'); \
         height=$$(echo "$$console_out" | grep "^height" | tail -n 1 | awk '{print $$2}'); \
         inside=$$(echo "$$console_out" | grep "^inside_pixels" | tail -n 1 | awk '{print $$2}'); \
         my_checksum=$$(echo "$$console_out" | grep "^my_checksum" | tail -n 1 | awk '{print $$2}'); \
 		\
-		# Calcolo dei limiti teorici \
 		total_pixels=$$((width * height)); \
 		\
-		# 5. Classificazione analitica in base alle statistiche estratte \
+		# classification \
 		if [ -z "$$inside" ] || [ -z "$$width" ] || [ -z "$$height" ]; then \
-			echo "ERRORE DI RENDERING (Impossibile verificare le statistiche del calcolo)"; \
+			echo "RENDERING ERROR(impossible to verify stats)"; \
 		elif [ "$$inside" -eq "$$total_pixels" ]; then \
-			echo "ERRORE DI RENDERING (Immagine generata ma completamente nera)"; \
+			echo "RENDERING ERROR (image generated but empty)"; \
 		elif [ "$$inside" -eq 0 ]; then \
-			echo "ERRORE DI RENDERING (Immagine generata ma priva di pixel interni)"; \
+			echo "RENDERING ERROR (image without pixels inside the mandelbrot)"; \
 		else \
-			echo "COMPILATO E FUNZIONANTE (Immagine valida generata in $$output_img, inside: $$inside) checksum=$$my_checksum"; \
+			echo "compiled and it works! (valid image) checksum=$$my_checksum"; \
 		fi; \
 	done
 	@echo "=========================================================================="

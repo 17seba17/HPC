@@ -1,4 +1,4 @@
-#ifndef        DECENTRALIZED_H
-#define        DECENTRALIZED_H
+#ifndef DECENTRALIZED_H
+#define DECENTRALIZED_H
 
 #endif

@@ -63,3 +63,11 @@ The following launcher scripts must be run as shell scripts:
 * `sh slurm/weak_scaling_launcher.sh`
 
 **Note:** Before running these launchers, ensure that you compile the source code inside the targeted cluster partition.
+
+## Container Image Build
+
+To build the Singularity container image (`mandelbrot.sif`) from the provided definition file (`mandelbrot.def`), execute the following command:
+
+```bash
+singularity build --fakeroot mandelbrot.sif mandelbrot.def
+```
